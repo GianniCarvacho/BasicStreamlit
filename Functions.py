@@ -5,7 +5,6 @@ import pandas as pd
 import plotly.express as px
 import json
 
-
 # Función para calcular el RM utilizando la fórmula de Epley
 def calcular_rm(peso, repes):
     if repes == 1:
@@ -16,7 +15,6 @@ def calcular_rm(peso, repes):
     rm = round(rm)
     rm_kg = round(rm_kg)
     return rm, rm_kg
-
 
 def register_weights():
     st.title('Registro de Pesos Levantados')
@@ -79,7 +77,6 @@ def display_charts():
 
      # Crear el gráfico de líneas 2
     # Asegurarse de que 'datatime' es de tipo datetime si no lo es
-     
     df['datetime'] = pd.to_datetime(df['datetime'])
 
     # Crear el gráfico de líneas múltiples
@@ -90,7 +87,6 @@ def display_charts():
     st.plotly_chart(fig, use_container_width=True)
 
 def about_page():
-
     st.title('Acerca de')
     st.write("Esta es una aplicación para registrar y visualizar pesos levantados en diferentes ejercicios.")
 
@@ -99,4 +95,3 @@ def load_exercises_Json():
     with open(FileJson, 'r') as file:
         data = json.load(file)
     return data['ejercicios']
-

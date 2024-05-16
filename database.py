@@ -1,4 +1,3 @@
-# database.py
 import sqlite3
 import pandas as pd
 from sqlalchemy import create_engine
@@ -39,11 +38,10 @@ def fetch_all_weights():
     c.execute('SELECT * FROM weights')
     data = c.fetchall()
     conn.close()
-    # return pd.DataFrame(data, columns=['id', 'exercise', 'weight_lbs'])
     return pd.DataFrame(data, columns=['id', 'exercise', 'weight_lbs', 'datetime'])
 
 def load_data_from_db():
-    engine = create_engine('sqlite:///Database/Lifting_weights.db')
+    engine = create_engine('sqlite:///Database/lifting_weights.db')
     query = """
     SELECT datetime, weight_lbs, exercise FROM weights
     """

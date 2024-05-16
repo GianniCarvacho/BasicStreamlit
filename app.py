@@ -2,19 +2,13 @@ import streamlit as st
 from database import insert_weight, create_db, fetch_all_weights
 import pandas as pd
 from pathlib import Path
-# import plotly.express as px
 from Functions import register_weights, TablaFull2, display_charts, about_page
-
 
 def main():
     # Inicializamos la base de datos
     create_db()
 
     st.sidebar.title('Opciones')
-
-
-
-
 
     # Definir botones y asignar estados a session_state
     if 'page' not in st.session_state:
