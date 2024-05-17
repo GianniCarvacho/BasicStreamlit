@@ -141,7 +141,7 @@ def display_charts():
 
 def about_page():
     st.title('Acerca de')
-    st.write("Esta es una aplicación para registrar y visualizar pesos levantados en diferentes ejercicios.")
+    
 
 def load_exercises_Json():
     FileJson = Path('Archivos/Ejercicios.json') 
@@ -150,7 +150,7 @@ def load_exercises_Json():
     return data['ejercicios']
 
 def TablaFull2():
-    st.title('Tabla Completa')
+    st.title('Tabla Conversiones Lbs/Kg')
     filepath = Path('Archivos/TablaPesos.xlsx')
     Tabla = pd.read_excel(filepath, engine='openpyxl')
     

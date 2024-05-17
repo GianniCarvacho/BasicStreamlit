@@ -12,8 +12,8 @@ def main():
         st.session_state.page = 'Registrar Pesos'
     if st.sidebar.button('Visualizar Pesos'):
         st.session_state.page = 'Visualizar Pesos'
-    if st.sidebar.button('TablaFull'):
-        st.session_state.page = 'TablaFull'    
+    if st.sidebar.button('Tabla Lbs/Kg'):
+        st.session_state.page = 'Tabla Lbs/Kg'    
     if st.sidebar.button('Acerca de'):
         st.session_state.page = 'Acerca de'
 
@@ -22,7 +22,7 @@ def main():
         register_weights()
     elif st.session_state.page == 'Visualizar Pesos':
         display_charts()
-    elif st.session_state.page == 'TablaFull':
+    elif st.session_state.page == 'Tabla Lbs/Kg':
         TablaFull2()    
     elif st.session_state.page == 'Acerca de':
         about_page()
