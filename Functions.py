@@ -167,34 +167,36 @@ def m_porcentajes():
     # Calcular los pesos en libras y kilogramos
     weights_lbs = [round(max_weight * (int(p[:-1]) / 100)) for p in percentages]
     weights_kg = [round(w * 0.453592) for w in weights_lbs]
+    
+    # Calcular los discos total y por lado
+    discs_total_lbs = [w - 45 for w in weights_lbs]
+    discs_per_side_lbs = [round(w / 2) for w in discs_total_lbs]
 
     # Crear un DataFrame con los porcentajes y pesos
     data = {
         'Porcentaje (%)': percentages,
-        'Peso Lbs': weights_lbs,
-        'Peso Kg': weights_kg
+        'Peso (Lbs)': weights_lbs,
+        'Peso Kg': weights_kg,
+        'Discos Total (lbs)': discs_total_lbs,
+        'Discos por lado (Lbs)': discs_per_side_lbs
     }
     df_percentages = pd.DataFrame(data)
 
     # Eliminar la primera columna de índice
     df_percentages.reset_index(drop=True, inplace=True)
 
-    # Función para aplicar el estilo condicional a toda la fila del 100%
-    def highlight_100(s):
-        return ['background-color: #004b58; color: white;' if s['Porcentaje (%)'] == '100%' else '' for _ in s]
+    # Generar HTML para la tabla
+    table_html = df_percentages.to_html(index=False, classes='dataframe')
 
-    # Aplicar el estilo condicional al DataFrame
-    styled_df = df_percentages.style.apply(highlight_100, axis=1)
-
-    # Mostrar la tabla en Streamlit con el estilo ajustado
+    # Estilo CSS para la tabla
     st.write("""
         <style>
         .dataframe {
-            width: 200%;
+            width: 70%;
             border-collapse: collapse;
         }
         .dataframe th, .dataframe td {
-            padding: 10px;
+            padding: 4px;  /* Ajustar el alto de cada celda */
             text-align: center;
             border: 1px solid #ddd;
         }
@@ -206,7 +208,7 @@ def m_porcentajes():
     """, unsafe_allow_html=True)
 
     st.write('Tabla de Porcentajes:')
-    st.dataframe(styled_df)
+    st.markdown(table_html, unsafe_allow_html=True)
 #Fin************************
 
 def m_tabla_conversiones():
@@ -228,11 +230,11 @@ def m_tabla_conversiones():
     st.write("""
         <style>
         .dataframe {
-            width: 80%;
+            width: 70%;
             border-collapse: collapse;
         }
         .dataframe th, .dataframe td {
-            padding: 10px;
+            padding: 5px;
             text-align: center;
             border: 1px solid #ddd;
         }
