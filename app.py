@@ -1,5 +1,5 @@
 import streamlit as st
-from Functions import register_weights, TablaFull2, display_charts, about_page
+from Functions import m_tabla_conversiones, m_visualiza_peso, m_about_page, m_registro_rm,m_porcentajes
 
 def main():
     st.sidebar.title('Opciones')
@@ -12,6 +12,8 @@ def main():
         st.session_state.page = 'Registrar Pesos'
     if st.sidebar.button('Visualizar Pesos'):
         st.session_state.page = 'Visualizar Pesos'
+    if st.sidebar.button('Porcentajes'):
+        st.session_state.page = 'Porcentajes'  # Añadir nueva opción al menú
     if st.sidebar.button('Tabla Lbs/Kg'):
         st.session_state.page = 'Tabla Lbs/Kg'    
     if st.sidebar.button('Acerca de'):
@@ -19,13 +21,15 @@ def main():
 
     # Comprobar el estado y ejecutar la función correspondiente
     if st.session_state.page == 'Registrar Pesos':
-        register_weights()
+        m_registro_rm()
     elif st.session_state.page == 'Visualizar Pesos':
-        display_charts()
+        m_visualiza_peso()
+    elif st.session_state.page == 'Porcentajes':
+        m_porcentajes()       
     elif st.session_state.page == 'Tabla Lbs/Kg':
-        TablaFull2()    
+        m_tabla_conversiones()    
     elif st.session_state.page == 'Acerca de':
-        about_page()
+        m_about_page()
 
 if __name__ == "__main__":
     main()

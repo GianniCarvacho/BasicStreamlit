@@ -2,24 +2,19 @@ import streamlit as st
 from airtable_db import insert_weight, fetch_all_weights, load_data_from_db
 import pandas as pd
 import plotly.express as px
-import json
 from pathlib import Path
 import pytz
+from utils import load_exercises_Json, calcular_rm
+
+
+
+
 # Definir tu zona horaria local para Chile
 local_tz = pytz.timezone('America/Santiago')  # Ajusta según tu zona horaria
 
-# Función para calcular el RM utilizando la fórmula de Epley
-def calcular_rm(peso, repes):
-    if repes == 1:
-        rm = peso
-    else:
-        rm = peso * (1 + repes / 30)
-    rm_kg = rm * 0.453592  # Convertir de libras a kilogramos
-    rm = round(rm)
-    rm_kg = round(rm_kg)
-    return rm, rm_kg
 
-def register_weights():
+# Opcion Registro de RM
+def m_registro_rm():
     st.title('Registro de Pesos Levantados')
     EjerciciosJson = load_exercises_Json()
     
@@ -44,7 +39,8 @@ def register_weights():
             insert_weight(exercise, rm)
             st.success(f'Registrado {rm} lbs para {exercise}')
 
-def display_charts():
+#Opcion Visualizar Pesos
+def m_visualiza_peso():
     st.title('Visualización de Pesos')
     
     # Cargar datos desde Airtable
@@ -112,17 +108,21 @@ def display_charts():
     # Verificar datos filtrados
     st.write("Historial:", filtered_data)
 
-    # Ajustar el ancho de las columnas automáticamente en la tabla
+    # Mostrar la tabla en Streamlit con el estilo ajustado
     st.write("""
         <style>
-        table {
+        .dataframe {
             width: 100%;
             border-collapse: collapse;
         }
-        th, td {
+        .dataframe th, .dataframe td {
             padding: 10px;
-            text-align: left;
+            text-align: center;
             border: 1px solid #ddd;
+        }
+        .dataframe th {
+            background-color: #444;  /* Color de fondo oscuro */
+            color: white;  /* Color del texto blanco */
         }
         </style>
     """, unsafe_allow_html=True)
@@ -139,17 +139,77 @@ def display_charts():
     # Mostrar el gráfico
     st.plotly_chart(fig, use_container_width=True)
 
-def about_page():
-    st.title('Acerca de')
+#************************
+def m_porcentajes():
+    # Cargar datos desde Airtable
+    df = load_data_from_db()
     
+    st.title('Porcentajes')
+    
+    # Cambiar los títulos de las columnas
+    df.rename(columns={
+        'ejercicio': 'Ejercicio',
+        'peso_rm': 'RM (Lbs)',
+        'fechahora': 'Fecha'
+    }, inplace=True)
 
-def load_exercises_Json():
-    FileJson = Path('Archivos/Ejercicios.json') 
-    with open(FileJson, 'r') as file:
-        data = json.load(file)
-    return data['ejercicios']
+    # Filtrar datos por el ejercicio seleccionado
+    JsonEjercicios = load_exercises_Json()
+    selected_exercise = st.selectbox('Selecciona Ejercicio', JsonEjercicios)
+    filtered_data = df[df['Ejercicio'] == selected_exercise]
 
-def TablaFull2():
+    # Obtener el mayor peso registrado para el ejercicio seleccionado
+    max_weight = filtered_data['RM (Lbs)'].max()
+
+    # Definir los porcentajes de 120% a 40% disminuyendo de 5% en 5%
+    percentages = [f"{p}%" for p in range(120, 35, -5)]
+
+    # Calcular los pesos en libras y kilogramos
+    weights_lbs = [round(max_weight * (int(p[:-1]) / 100)) for p in percentages]
+    weights_kg = [round(w * 0.453592) for w in weights_lbs]
+
+    # Crear un DataFrame con los porcentajes y pesos
+    data = {
+        'Porcentaje (%)': percentages,
+        'Peso Lbs': weights_lbs,
+        'Peso Kg': weights_kg
+    }
+    df_percentages = pd.DataFrame(data)
+
+    # Eliminar la primera columna de índice
+    df_percentages.reset_index(drop=True, inplace=True)
+
+    # Función para aplicar el estilo condicional a toda la fila del 100%
+    def highlight_100(s):
+        return ['background-color: #004b58; color: white;' if s['Porcentaje (%)'] == '100%' else '' for _ in s]
+
+    # Aplicar el estilo condicional al DataFrame
+    styled_df = df_percentages.style.apply(highlight_100, axis=1)
+
+    # Mostrar la tabla en Streamlit con el estilo ajustado
+    st.write("""
+        <style>
+        .dataframe {
+            width: 200%;
+            border-collapse: collapse;
+        }
+        .dataframe th, .dataframe td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        .dataframe th {
+            background-color: #444;  /* Color de fondo oscuro */
+            color: white;  /* Color del texto blanco */
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    st.write('Tabla de Porcentajes:')
+    st.dataframe(styled_df)
+#Fin************************
+
+def m_tabla_conversiones():
     st.title('Tabla Conversiones Lbs/Kg')
     filepath = Path('Archivos/TablaPesos.xlsx')
     Tabla = pd.read_excel(filepath, engine='openpyxl')
@@ -162,6 +222,45 @@ def TablaFull2():
     Tabla_filtrada = Tabla_filtrada.reset_index(drop=True)
 
     # Convertir el DataFrame a HTML y ocultar el índice
-    html = Tabla_filtrada.to_html(index=False)
-    st.markdown(html, unsafe_allow_html=True)
+    html = Tabla_filtrada.to_html(index=False, classes='dataframe')
 
+    # Mostrar la tabla en Streamlit con el estilo ajustado
+    st.write("""
+        <style>
+        .dataframe {
+            width: 80%;
+            border-collapse: collapse;
+        }
+        .dataframe th, .dataframe td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        .dataframe th {
+            background-color: #444;  /* Color de fondo oscuro */
+            color: white;  /* Color del texto blanco */
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown(html, unsafe_allow_html=True)
+#Opcion Tabla Conversiones    
+# def m_tabla_conversiones():
+#     st.title('Tabla Conversiones Lbs/Kg')
+#     filepath = Path('Archivos/TablaPesos.xlsx')
+#     Tabla = pd.read_excel(filepath, engine='openpyxl')
+    
+#     # Seleccionar las columnas deseadas, ejemplo de columnas
+#     columnas_deseadas = ['Libras por Lado', 'Libras Totales', 'Kilos Totales']
+#     Tabla_filtrada = Tabla[columnas_deseadas]
+
+#     # Resetear el índice para no mostrar la columna del índice en el DataFrame
+#     Tabla_filtrada = Tabla_filtrada.reset_index(drop=True)
+
+#     # Convertir el DataFrame a HTML y ocultar el índice
+#     html = Tabla_filtrada.to_html(index=False)
+#     st.markdown(html, unsafe_allow_html=True)
+
+#Opcion Acerca de
+def m_about_page():
+    st.title('Acerca de')
