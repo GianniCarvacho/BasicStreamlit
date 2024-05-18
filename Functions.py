@@ -192,7 +192,7 @@ def m_porcentajes():
     st.write("""
         <style>
         .dataframe {
-            width: 70%;
+            width: 90%;
             border-collapse: collapse;
         }
         .dataframe th, .dataframe td {
@@ -230,7 +230,7 @@ def m_tabla_conversiones():
     st.write("""
         <style>
         .dataframe {
-            width: 70%;
+            width: 90%;
             border-collapse: collapse;
         }
         .dataframe th, .dataframe td {
