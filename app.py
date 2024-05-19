@@ -63,8 +63,6 @@ def main():
         st.session_state.page = 'Porcentajes'
     if st.sidebar.button('Tabla Lbs/Kg'):
         st.session_state.page = 'Tabla Lbs/Kg'
-    if st.sidebar.button('Acerca de'):
-        st.session_state.page = 'Acerca de'
     if st.sidebar.button('Cerrar Sesión'):
         for key in st.session_state.keys():
             del st.session_state[key]
@@ -78,8 +76,7 @@ def main():
         m_porcentajes(user)
     elif st.session_state.page == 'Tabla Lbs/Kg':
         m_tabla_conversiones()
-    elif st.session_state.page == 'Acerca de':
-        m_about_page()
+
 
 if __name__ == "__main__":
     main()
