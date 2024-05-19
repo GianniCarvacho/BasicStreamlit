@@ -15,7 +15,7 @@ users_table = Table(AIRTABLE_API_KEY, BASE_ID, USERS_TABLE_NAME)
 # Definir tu zona horaria local para Chile
 local_tz = pytz.timezone('America/Santiago')  # Ajusta según tu zona horaria
 
-def insert_weight(exercise, weight):
+def insert_weight(exercise, weight,user):
     # Obtener la hora actual en UTC y convertir a la zona horaria local
     now_utc = pd.Timestamp.now(tz='UTC')
     now_local = now_utc.tz_convert(local_tz)
@@ -24,7 +24,8 @@ def insert_weight(exercise, weight):
     record = {
         "ejercicio": exercise,
         "peso_rm": weight,
-        "fechahora": now_local.isoformat()
+        "fechahora": now_local.isoformat(),
+        "usuario": user
 
     }
     table.create(record)

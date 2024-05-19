@@ -7,7 +7,7 @@ from pathlib import Path
 import pytz
 
 # Opción Registro de RM
-def m_registro_rm():
+def m_registro_rm(user):
     st.title('Registro de Pesos Levantados')
     EjerciciosJson = load_exercises_Json()
 
@@ -29,7 +29,7 @@ def m_registro_rm():
         submit_button = st.form_submit_button(label='Guardar')
 
         if submit_button:
-            insert_weight(exercise, rm)
+            insert_weight(exercise, rm, user)
             st.success(f'Registrado {rm} lbs para {exercise}')
 
 # Opción Visualizar Pesos

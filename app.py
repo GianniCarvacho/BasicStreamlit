@@ -66,15 +66,16 @@ def main():
     if st.sidebar.button('Acerca de'):
         st.session_state.page = 'Acerca de'
     if st.sidebar.button('Cerrar Sesión'):
-        st.session_state.page = None
-        st.session_state.password_correct = False
+        for key in st.session_state.keys():
+            del st.session_state[key]
+        st.rerun()
 
     if st.session_state.page == 'Registrar Pesos':
-        m_registro_rm()
+        m_registro_rm(user)
     elif st.session_state.page == 'Visualizar Pesos':
         m_visualiza_peso(user)
     elif st.session_state.page == 'Porcentajes':
-        m_porcentajes()
+        m_porcentajes(user)
     elif st.session_state.page == 'Tabla Lbs/Kg':
         m_tabla_conversiones()
     elif st.session_state.page == 'Acerca de':
