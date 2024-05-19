@@ -165,3 +165,4 @@ cython_debug/
 #Gianni
 varios/
 .streamlit/secrets.toml
+.DS_Store/
