@@ -1,26 +1,19 @@
 import streamlit as st
 from airtable_db import insert_weight, fetch_all_weights, load_data_from_db
-import pandas as pd
+from utils import load_exercises_Json, calcular_rm
 import plotly.express as px
+import pandas as pd
 from pathlib import Path
 import pytz
-from utils import load_exercises_Json, calcular_rm
 
-
-
-
-# Definir tu zona horaria local para Chile
-local_tz = pytz.timezone('America/Santiago')  # Ajusta según tu zona horaria
-
-
-# Opcion Registro de RM
+# Opción Registro de RM
 def m_registro_rm():
     st.title('Registro de Pesos Levantados')
     EjerciciosJson = load_exercises_Json()
-    
+
     exercise = st.selectbox('Elegir ejercicio', (EjerciciosJson))
     st.radio('Barra', ['45 Lbs.'])
-    valorBarra = int(45) 
+    valorBarra = int(45)
 
     discos = st.number_input('Total Discos (lbs)', min_value=0)
     weight = discos + valorBarra
@@ -31,20 +24,20 @@ def m_registro_rm():
 
     # Mostrar el cálculo del RM
     st.markdown(f'**RM estimado:** {rm} lbs ({rm_kg} kg)')
-    
+
     with st.form(key='weight_form'):
         submit_button = st.form_submit_button(label='Guardar')
-        
+
         if submit_button:
             insert_weight(exercise, rm)
             st.success(f'Registrado {rm} lbs para {exercise}')
 
-#Opcion Visualizar Pesos
-def m_visualiza_peso():
+# Opción Visualizar Pesos
+def m_visualiza_peso(usuario):
     st.title('Visualización de Pesos')
-    
+
     # Cargar datos desde Airtable
-    df = load_data_from_db()
+    df = load_data_from_db(usuario)
 
     # Eliminar la columna 'id' si existe
     if 'id' in df.columns:
@@ -60,8 +53,8 @@ def m_visualiza_peso():
         st.write("Columnas duplicadas detectadas antes de renombrar y eliminadas.")
         df = df.loc[:, ~df.columns.duplicated()]
 
-
     # Convertir 'fechahora' a formato datetime y ajustar a la zona horaria local
+    local_tz = pytz.timezone('America/Santiago')  # Ajusta según tu zona horaria
     df['fechahora'] = pd.to_datetime(df['fechahora'], errors='coerce', utc=True).dt.tz_convert(local_tz)
     df['RM (Lbs)'] = pd.to_numeric(df['peso_rm'], errors='coerce')
     df['Ejercicio'] = df['ejercicio'].astype(str)
@@ -70,7 +63,6 @@ def m_visualiza_peso():
     if df['fechahora'].isnull().any():
         st.error("Hay fechas no válidas en los datos. Verifica los registros.")
         st.write(df[df['fechahora'].isnull()])  # Mostrar registros con fechas no válidas para depuración
-
 
     # Ordenar datos por 'fechahora' de más reciente a más antiguo
     df = df.sort_values(by='fechahora', ascending=False)
@@ -100,7 +92,6 @@ def m_visualiza_peso():
     # Seleccionar columnas y ajustar formato de la fecha
     filtered_data = filtered_data[['Ejercicio', 'RM (Lbs)', 'RM (Kg)', 'Fecha']]
     filtered_data['Fecha'] = filtered_data['Fecha'].dt.strftime('%Y-%m-%d %H:%M')
-
 
     # Reiniciar el índice del DataFrame para evitar duplicados
     filtered_data.reset_index(drop=True, inplace=True)
@@ -139,13 +130,13 @@ def m_visualiza_peso():
     # Mostrar el gráfico
     st.plotly_chart(fig, use_container_width=True)
 
-#************************
-def m_porcentajes():
+# Opción Porcentajes
+def m_porcentajes(usuario):
     # Cargar datos desde Airtable
-    df = load_data_from_db()
-    
+    df = load_data_from_db(usuario)
+
     st.title('Porcentajes')
-    
+
     # Cambiar los títulos de las columnas
     df.rename(columns={
         'ejercicio': 'Ejercicio',
@@ -167,7 +158,7 @@ def m_porcentajes():
     # Calcular los pesos en libras y kilogramos
     weights_lbs = [round(max_weight * (int(p[:-1]) / 100)) for p in percentages]
     weights_kg = [round(w * 0.453592) for w in weights_lbs]
-    
+
     # Calcular los discos total y por lado
     discs_total_lbs = [w - 45 for w in weights_lbs]
     discs_per_side_lbs = [round(w / 2) for w in discs_total_lbs]
@@ -209,13 +200,13 @@ def m_porcentajes():
 
     st.write('Tabla de Porcentajes:')
     st.markdown(table_html, unsafe_allow_html=True)
-#Fin************************
 
+# Opción Tabla Conversiones
 def m_tabla_conversiones():
     st.title('Tabla Conversiones Lbs/Kg')
     filepath = Path('Archivos/TablaPesos.xlsx')
     Tabla = pd.read_excel(filepath, engine='openpyxl')
-    
+
     # Seleccionar las columnas deseadas, ejemplo de columnas
     columnas_deseadas = ['Libras por Lado', 'Libras Totales', 'Kilos Totales']
     Tabla_filtrada = Tabla[columnas_deseadas]
@@ -246,23 +237,7 @@ def m_tabla_conversiones():
     """, unsafe_allow_html=True)
 
     st.markdown(html, unsafe_allow_html=True)
-#Opcion Tabla Conversiones    
-# def m_tabla_conversiones():
-#     st.title('Tabla Conversiones Lbs/Kg')
-#     filepath = Path('Archivos/TablaPesos.xlsx')
-#     Tabla = pd.read_excel(filepath, engine='openpyxl')
-    
-#     # Seleccionar las columnas deseadas, ejemplo de columnas
-#     columnas_deseadas = ['Libras por Lado', 'Libras Totales', 'Kilos Totales']
-#     Tabla_filtrada = Tabla[columnas_deseadas]
 
-#     # Resetear el índice para no mostrar la columna del índice en el DataFrame
-#     Tabla_filtrada = Tabla_filtrada.reset_index(drop=True)
-
-#     # Convertir el DataFrame a HTML y ocultar el índice
-#     html = Tabla_filtrada.to_html(index=False)
-#     st.markdown(html, unsafe_allow_html=True)
-
-#Opcion Acerca de
+# Opción Acerca de
 def m_about_page():
     st.title('Acerca de')
