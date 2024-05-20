@@ -2,33 +2,10 @@ import streamlit as st
 import hmac
 import os
 from Functions import fetch_all_weights, m_visualiza_peso, m_tabla_conversiones, m_about_page, m_registro_rm, m_porcentajes
+from utils import check_password
 import base64
 
-def check_password():
-    def login_form():
-        with st.form("Credentials"):
-            st.text_input("Username", key="username")
-            st.text_input("Password", type="password", key="password")
-            st.form_submit_button("Log in", on_click=password_entered)
-    
-    def password_entered():
-        if st.session_state["username"] in st.secrets["passwords"] and \
-           hmac.compare_digest(st.session_state["password"], st.secrets.passwords[st.session_state["username"]]):
-            st.session_state["password_correct"] = True
-            st.session_state["current_user"] = st.session_state["username"]
-            del st.session_state["password"]
-            del st.session_state["username"]
-        else:
-            st.session_state["password_correct"] = False
-    
-    if st.session_state.get("password_correct", False):
-        return True
-    
-    login_form()
-    
-    if "password_correct" in st.session_state and not st.session_state["password_correct"]:
-        st.error("User not known or password incorrect")
-    return False
+
 
 def main():
     if not check_password():

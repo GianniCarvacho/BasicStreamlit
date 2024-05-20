@@ -1,6 +1,6 @@
 import streamlit as st
 from airtable_db import insert_weight, fetch_all_weights, load_data_from_db
-from utils import load_exercises_Json, calcular_rm
+from utils import load_exercises_Json, calcular_rm, get_table_style
 import plotly.express as px
 import pandas as pd
 from pathlib import Path
@@ -93,30 +93,13 @@ def m_visualiza_peso(usuario):
     filtered_data = filtered_data[['Ejercicio', 'RM (Lbs)', 'RM (Kg)', 'Fecha']]
     filtered_data['Fecha'] = filtered_data['Fecha'].dt.strftime('%Y-%m-%d %H:%M')
 
-    # Reiniciar el índice del DataFrame para evitar duplicados
-    filtered_data.reset_index(drop=True, inplace=True)
 
-    # Verificar datos filtrados
-    st.write("Historial:", filtered_data)
+ # Mostrar la tabla en Streamlit con el estilo ajustado
+    st.write(get_table_style(), unsafe_allow_html=True)
+    st.markdown(filtered_data.to_html(index=False, classes='dataframe'), unsafe_allow_html=True)
 
-    # Mostrar la tabla en Streamlit con el estilo ajustado
-    st.write("""
-        <style>
-        .dataframe {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .dataframe th, .dataframe td {
-            padding: 10px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
-        .dataframe th {
-            background-color: #444;  /* Color de fondo oscuro */
-            color: white;  /* Color del texto blanco */
-        }
-        </style>
-    """, unsafe_allow_html=True)
+    # st.markdown(filtered_data.to_html(index=False, classes='dataframe'), unsafe_allow_html=True)
+
 
     # Crear el gráfico de líneas 1
     fig = px.line(filtered_data, x='Fecha', y='RM (Lbs)', title=f'Peso registrado en el tiempo para {selected_exercise}')
@@ -176,30 +159,11 @@ def m_porcentajes(usuario):
     # Eliminar la primera columna de índice
     df_percentages.reset_index(drop=True, inplace=True)
 
-    # Generar HTML para la tabla
-    table_html = df_percentages.to_html(index=False, classes='dataframe')
 
-    # Estilo CSS para la tabla
-    st.write("""
-        <style>
-        .dataframe {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .dataframe th, .dataframe td {
-            padding: 4px;  /* Ajustar el alto de cada celda */
-            text-align: center;
-            border: 1px solid #ddd;
-        }
-        .dataframe th {
-            background-color: #444;  /* Color de fondo oscuro */
-            color: white;  /* Color del texto blanco */
-        }
-        </style>
-    """, unsafe_allow_html=True)
+    st.write(get_table_style(), unsafe_allow_html=True)
+    st.markdown(df_percentages.to_html(index=False, classes='dataframe'), unsafe_allow_html=True)
 
-    st.write('Tabla de Porcentajes:')
-    st.markdown(table_html, unsafe_allow_html=True)
+
 
 # Opción Tabla Conversiones
 def m_tabla_conversiones():
@@ -214,29 +178,11 @@ def m_tabla_conversiones():
     # Resetear el índice para no mostrar la columna del índice en el DataFrame
     Tabla_filtrada = Tabla_filtrada.reset_index(drop=True)
 
-    # Convertir el DataFrame a HTML y ocultar el índice
-    html = Tabla_filtrada.to_html(index=False, classes='dataframe')
-
     # Mostrar la tabla en Streamlit con el estilo ajustado
-    st.write("""
-        <style>
-        .dataframe {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .dataframe th, .dataframe td {
-            padding: 5px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
-        .dataframe th {
-            background-color: #444;  /* Color de fondo oscuro */
-            color: white;  /* Color del texto blanco */
-        }
-        </style>
-    """, unsafe_allow_html=True)
+    st.write(get_table_style(), unsafe_allow_html=True)
+    st.markdown(Tabla_filtrada.to_html(index=False, classes='dataframe'), unsafe_allow_html=True)
 
-    st.markdown(html, unsafe_allow_html=True)
+
 
 # Opción Acerca de
 def m_about_page():
