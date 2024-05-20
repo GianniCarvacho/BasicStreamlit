@@ -8,7 +8,7 @@ import pytz
 
 # Opción Registro de RM
 def m_registro_rm(user):
-    st.title('Registro de Pesos Levantados')
+    st.title('Registro de RM')
     EjerciciosJson = load_exercises_Json()
 
     exercise = st.selectbox('Elegir ejercicio', (EjerciciosJson))
