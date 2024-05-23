@@ -5,10 +5,14 @@ import pytz
 import streamlit as st
 import streamlit as st
 
+<<<<<<< HEAD
 
 AIRTABLE_API_KEY = st.secrets["Keys"]["airtable_key"]  # Reemplaza con tu API key de Airtable
 BASE_ID = st.secrets["Keys"]["airtable_baseid"]  # Reemplaza con el ID de tu base en Airtable
 AIRTABLE_API_KEY = st.secrets["Keys"]["airtable_key"]
+=======
+AIRTABLE_API_KEY = st.secrets["Keys"]["airtable_key"]  # Reemplaza con tu API key de Airtable
+>>>>>>> 3caa8f6... ajustes sin openai y secrets
 BASE_ID = st.secrets["Keys"]["airtable_baseid"]  # Reemplaza con el ID de tu base en Airtable
 TABLE_NAME = 'weights'
 USERS_TABLE_NAME = 'usuarios'

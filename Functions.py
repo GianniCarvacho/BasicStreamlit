@@ -214,8 +214,8 @@ def m_about_page():
 
 
 def m_home_page(user):
-    st.title('Bienvenido')
-    st.write(f"Hola, {user}. Esta es tu página de inicio.")
+    st.title('Bienvenido a tu Dashboard de CrossFit')
+    st.write(f"Hola, {user}. Esta es tu página de inicio. Aquí podrás acceder a diferentes opciones desde el menú lateral.")
 
 
 def update_profile(user):
@@ -233,5 +233,4 @@ def update_profile(user):
         # Guardar datos en Airtable
         insert_user_profile(nombre, edad, sexo, dias_entrenamiento)
         st.success("Datos guardados exitosamente.")
-
 
