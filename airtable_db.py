@@ -3,8 +3,12 @@ from pyairtable import Table
 from pyairtable.api import Api
 import pytz
 import streamlit as st
+import streamlit as st
+
 
 AIRTABLE_API_KEY = st.secrets["Keys"]["airtable_key"]  # Reemplaza con tu API key de Airtable
+BASE_ID = st.secrets["Keys"]["airtable_baseid"]  # Reemplaza con el ID de tu base en Airtable
+AIRTABLE_API_KEY = st.secrets["Keys"]["airtable_key"]
 BASE_ID = st.secrets["Keys"]["airtable_baseid"]  # Reemplaza con el ID de tu base en Airtable
 TABLE_NAME = 'weights'
 USERS_TABLE_NAME = 'usuarios'

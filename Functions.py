@@ -233,3 +233,5 @@ def update_profile(user):
         # Guardar datos en Airtable
         insert_user_profile(nombre, edad, sexo, dias_entrenamiento)
         st.success("Datos guardados exitosamente.")
+
+
