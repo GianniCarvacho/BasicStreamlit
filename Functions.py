@@ -214,8 +214,8 @@ def m_about_page():
 
 
 def m_home_page(user):
-    st.title('Bienvenido a tu Dashboard de CrossFit')
-    st.write(f"Hola, {user}. Esta es tu página de inicio. Aquí podrás acceder a diferentes opciones desde el menú lateral.")
+    st.title('Bienvenido')
+    st.write(f"Hola, {user}. Esta es tu página de inicio. ¡Bienvenido!")
 
 
 def update_profile(user):
