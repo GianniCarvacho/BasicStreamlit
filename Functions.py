@@ -214,8 +214,8 @@ def m_about_page():
 
 
 def m_home_page(user):
-    st.title('Consjos con IA - En Desarrollo')
-    st.write(f"Hola, {user}. Esta es tu página de inicio. .")
+    st.title('Bienvenido')
+    st.write(f"Hola, {user}. Esta es tu página de inicio.")
 
 
 def update_profile(user):
