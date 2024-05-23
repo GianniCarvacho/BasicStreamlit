@@ -166,3 +166,4 @@ cython_debug/
 varios/
 .streamlit/secrets.toml
 .DS_Store/
+openai.py

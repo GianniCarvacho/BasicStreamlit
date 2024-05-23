@@ -46,7 +46,6 @@ def check_password():
         st.error("User not known or password incorrect")
     return False
 
-# utils.py
 
 def get_table_style():
     return """

@@ -7,10 +7,12 @@ AIRTABLE_API_KEY = 'pat6GluiYk9LiwfUq.4da5f6525e5251a292371c725f0cab6a4e25e9a322
 BASE_ID = 'app5yIUTSGAhAWec2'  # Reemplaza con el ID de tu base en Airtable
 TABLE_NAME = 'weights'
 USERS_TABLE_NAME = 'usuarios'
+TABLE_PROFILE = 'perfil'
 
 api = Api(AIRTABLE_API_KEY)
 table = Table(AIRTABLE_API_KEY, BASE_ID, TABLE_NAME)
 users_table = Table(AIRTABLE_API_KEY, BASE_ID, USERS_TABLE_NAME)
+profile_table = Table(AIRTABLE_API_KEY, BASE_ID, TABLE_PROFILE)
 
 # Definir tu zona horaria local para Chile
 local_tz = pytz.timezone('America/Santiago')  # Ajusta según tu zona horaria
@@ -44,3 +46,18 @@ def fetch_weights_by_user(username):
     records = table.all()
     weights = [{'fechahora': record['fields'].get('fechahora'), 'peso_rm': record['fields'].get('peso_rm'), 'ejercicio': record['fields'].get('ejercicio')} for record in records if record['fields'].get('username') == username]
     return pd.DataFrame(weights)
+
+def insert_user_profile(nombre, edad, sexo, dias_entrenamiento):
+    # Obtener la hora actual en UTC y convertir a la zona horaria local
+    now_utc = pd.Timestamp.now(tz='UTC')
+    now_local = now_utc.tz_convert(local_tz)
+    
+    # Crear el registro con la hora local en formato ISO 8601
+    record = {
+        "nombre": nombre,
+        "edad": edad,
+        "sexo": sexo,
+        "total_entren": dias_entrenamiento,
+    }
+
+    profile_table.create(record)
