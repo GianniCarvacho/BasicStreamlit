@@ -1,5 +1,5 @@
 import streamlit as st
-from airtable_db import insert_weight, fetch_all_weights, load_data_from_db, insert_user_profile
+from airtable_db import insert_weight, fetch_all_weights, load_data_from_db, insert_user_profile, get_user_profile,insert_or_update_user_profile
 from utils import load_exercises_Json, calcular_rm, get_table_style
 import plotly.express as px
 import pandas as pd
@@ -16,7 +16,7 @@ def m_registro_rm(user):
     st.radio('Barra', ['45 Lbs.'])
     valorBarra = int(45)
 
-    discos = st.number_input('Total Discos (lbs)', min_value=0)
+    discos = st.number_input('Suma Total Libras', min_value=0)
     weight = discos + valorBarra
     repes = st.number_input('Número de Repeticiones', min_value=1, max_value=10)
 
@@ -202,9 +202,13 @@ def m_tabla_conversiones():
     # Resetear el índice para no mostrar la columna del índice en el DataFrame
     Tabla_filtrada = Tabla_filtrada.reset_index(drop=True)
 
+    # Quitar decimales de la columna "Kilos Totales"
+    Tabla_filtrada['Kilos Totales'] = Tabla_filtrada['Kilos Totales'].astype(int)
+
     # Mostrar la tabla en Streamlit con el estilo ajustado
     st.write(get_table_style(), unsafe_allow_html=True)
     st.markdown(Tabla_filtrada.to_html(index=False, classes='dataframe'), unsafe_allow_html=True)
+
 
 
 
@@ -218,19 +222,45 @@ def m_home_page(user):
     st.write(f"Hola, {user}. Esta es tu página de inicio. ¡Bienvenido!")
 
 
-def update_profile(user):
-    #  print(f"Perfil de {user} actualizado")  # Ejemplo de implementación de la función
+# def update_profile(user):
+#     #  print(f"Perfil de {user} actualizado")  # Ejemplo de implementación de la función
 
-        # Formulario de entrada de datos
+#         # Formulario de entrada de datos
+#     st.title("Formulario de Registro de Usuario")
+
+#     nombre = st.text_input("Nombre")
+#     edad = st.number_input("Edad", min_value=15, max_value=60)
+#     sexo = st.selectbox("Sexo", ["Hombre", "Mujer"])
+#     dias_entrenamiento = st.slider("Cuantos días entrenas a la Semana", 1, 7)
+
+#     if st.button("Guardar datos"):
+#         # Guardar datos en Airtable
+#         insert_user_profile(user, nombre, edad, sexo, dias_entrenamiento)
+#         st.success("Datos guardados exitosamente.")
+
+def update_profile(user):
     st.title("Formulario de Registro de Usuario")
 
-    nombre = st.text_input("Nombre")
-    edad = st.number_input("Edad", min_value=15, max_value=60)
-    sexo = st.selectbox("Sexo", ["Hombre", "Mujer"])
-    dias_entrenamiento = st.slider("Cuantos días entrenas a la Semana", 1, 7)
-
+    # Verificar si el usuario existe en la base de datos
+    user_profile = get_user_profile(user)
+    
+    if user_profile:
+        # Si el usuario existe, mostrar los datos actuales en el formulario
+        nombre = st.text_input("Nombre", user_profile['fields'].get('nombre', ''))
+        edad = st.number_input("Edad", min_value=15, max_value=60, value=user_profile['fields'].get('edad', 15))
+        sexo = st.selectbox("Sexo", ["Hombre", "Mujer"], index=["Hombre", "Mujer"].index(user_profile['fields'].get('sexo', 'Hombre')))
+        dias_entrenamiento = st.slider("Cuantos días entrenas a la Semana", 1, 7, value=user_profile['fields'].get('total_entren', 1))
+        accion = 'update'
+    else:
+        # Si el usuario no existe, mostrar el formulario vacío
+        nombre = st.text_input("Nombre")
+        edad = st.number_input("Edad", min_value=15, max_value=60)
+        sexo = st.selectbox("Sexo", ["Hombre", "Mujer"])
+        dias_entrenamiento = st.slider("Cuantos días entrenas a la Semana", 1, 7)
+        accion = 'insert'
+    
+    
     if st.button("Guardar datos"):
-        # Guardar datos en Airtable
-        insert_user_profile(nombre, edad, sexo, dias_entrenamiento)
+        insert_or_update_user_profile(user, nombre, edad, sexo, dias_entrenamiento, accion)
         st.success("Datos guardados exitosamente.")
 

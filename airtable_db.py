@@ -43,21 +43,34 @@ def fetch_all_weights(usuario):
     return df
 
 def load_data_from_db(usuario):
-    return fetch_all_weights(usuario)
+    """
+    Load data from the database for a given user.
 
+    Parameters:
+    usuario (str): The username of the user.
+
+    Returns:
+    list: A list of weights for the user.
+    """
+    return fetch_all_weights(usuario)
 
 def fetch_weights_by_user(username):
     records = table.all()
     weights = [{'fechahora': record['fields'].get('fechahora'), 'peso_rm': record['fields'].get('peso_rm'), 'ejercicio': record['fields'].get('ejercicio')} for record in records if record['fields'].get('username') == username]
     return pd.DataFrame(weights)
 
-def insert_user_profile(nombre, edad, sexo, dias_entrenamiento):
+
+# Inicio Perfil de usuario ------------------------
+
+#Inserta perfil de usuario
+def insert_user_profile(usuario, nombre, edad, sexo, dias_entrenamiento):
     # Obtener la hora actual en UTC y convertir a la zona horaria local
-    now_utc = pd.Timestamp.now(tz='UTC')
-    now_local = now_utc.tz_convert(local_tz)
+    # now_utc = pd.Timestamp.now(tz='UTC')
+    # now_local = now_utc.tz_convert(local_tz)
     
     # Crear el registro con la hora local en formato ISO 8601
     record = {
+        "usuario": usuario,
         "nombre": nombre,
         "edad": edad,
         "sexo": sexo,
@@ -65,3 +78,26 @@ def insert_user_profile(nombre, edad, sexo, dias_entrenamiento):
     }
 
     profile_table.create(record)
+
+
+
+def get_user_profile(user):
+    records = profile_table.all()
+    for record in records:
+        if record['fields'].get('usuario') == user:
+            return record  # Devuelve el primer registro que coincida
+    return None  # Devuelve None si no se encontraron coincidencias
+
+def insert_or_update_user_profile(user, nombre, edad, sexo, dias_entrenamiento, accion):
+    profile = get_user_profile(user)
+    if accion == 'insert':
+        insert_user_profile(user, nombre, edad, sexo, dias_entrenamiento)
+    elif accion == 'update':
+       fields = {
+            'usuario': user,
+            'nombre': nombre,
+            'edad': edad,
+            'sexo': sexo,
+            'total_entren': dias_entrenamiento,
+        }
+    profile_table.update(profile['id'], fields)

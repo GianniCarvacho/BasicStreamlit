@@ -19,7 +19,6 @@ def calcular_rm(peso, repes):
     rm_kg = rm * 0.453592  # Convertir de libras a kilogramos
     return round(rm), round(rm_kg)
 
-
 def check_password():
     def login_form():
         with st.form("Credentials"):
@@ -45,7 +44,6 @@ def check_password():
     if "password_correct" in st.session_state and not st.session_state["password_correct"]:
         st.error("User not known or password incorrect")
     return False
-
 
 def get_table_style():
     return """
