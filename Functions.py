@@ -239,28 +239,32 @@ def m_home_page(user):
 #         st.success("Datos guardados exitosamente.")
 
 def update_profile(user):
-    st.title("Formulario de Registro de Usuario")
+    try: 
+        st.title("Formulario de Registro de Usuario")
 
-    # Verificar si el usuario existe en la base de datos
-    user_profile = get_user_profile(user)
-    
-    if user_profile:
-        # Si el usuario existe, mostrar los datos actuales en el formulario
-        nombre = st.text_input("Nombre", user_profile['fields'].get('nombre', ''))
-        edad = st.number_input("Edad", min_value=15, max_value=60, value=user_profile['fields'].get('edad', 15))
-        sexo = st.selectbox("Sexo", ["Hombre", "Mujer"], index=["Hombre", "Mujer"].index(user_profile['fields'].get('sexo', 'Hombre')))
-        dias_entrenamiento = st.slider("Cuantos días entrenas a la Semana", 1, 7, value=user_profile['fields'].get('total_entren', 1))
-        accion = 'update'
-    else:
-        # Si el usuario no existe, mostrar el formulario vacío
-        nombre = st.text_input("Nombre")
-        edad = st.number_input("Edad", min_value=15, max_value=60)
-        sexo = st.selectbox("Sexo", ["Hombre", "Mujer"])
-        dias_entrenamiento = st.slider("Cuantos días entrenas a la Semana", 1, 7)
-        accion = 'insert'
-    
-    
-    if st.button("Guardar datos"):
-        insert_or_update_user_profile(user, nombre, edad, sexo, dias_entrenamiento, accion)
-        st.success("Datos guardados exitosamente.")
+        # Verificar si el usuario existe en la base de datos
+        user_profile = get_user_profile(user)
+        
+        if user_profile:
+            # Si el usuario existe, mostrar los datos actuales en el formulario
+            nombre = st.text_input("Nombre", user_profile['fields'].get('nombre', ''))
+            edad = st.number_input("Edad", min_value=15, max_value=60, value=user_profile['fields'].get('edad', 15))
+            sexo = st.selectbox("Sexo", ["Hombre", "Mujer"], index=["Hombre", "Mujer"].index(user_profile['fields'].get('sexo', 'Hombre')))
+            dias_entrenamiento = st.slider("Cuantos días entrenas a la Semana", 1, 7, value=user_profile['fields'].get('total_entren', 1))
+            accion = 'update'
+        else:
+            # Si el usuario no existe, mostrar el formulario vacío
+            nombre = st.text_input("Nombre")
+            edad = st.number_input("Edad", min_value=15, max_value=60)
+            sexo = st.selectbox("Sexo", ["Hombre", "Mujer"])
+            dias_entrenamiento = st.slider("Cuantos días entrenas a la Semana", 1, 7)
+            accion = 'insert'
+        
+        
+        if st.button("Guardar datos"):
+            insert_or_update_user_profile(user, nombre, edad, sexo, dias_entrenamiento, accion)
+            st.success("Datos guardados exitosamente.")
+    except Exception as e:
+        print(f"Error update_profile: {e}")
+        st.error("Ocurrió un error al guardar los datos. Inténtalo de nuevo más tarde.")
 
