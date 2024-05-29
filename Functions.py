@@ -5,7 +5,9 @@ import plotly.express as px
 import pandas as pd
 from pathlib import Path
 import pytz
+from datetime import datetime
 # from utils_openai import obtener_mensaje_motivacional
+
 
 # Opción Registro de RM
 def m_registro_rm(user):
@@ -66,9 +68,9 @@ def m_visualiza_peso(usuario):
         return
 
     # Convertir 'fechahora' a formato datetime y ajustar a la zona horaria local
-    local_tz = pytz.timezone('America/Santiago')  # Ajusta según tu zona horaria
+    local_tz = pytz.timezone('America/Santiago')
     df['fechahora'] = pd.to_datetime(df['fechahora'], errors='coerce', utc=True).dt.tz_convert(local_tz)
-    df['RM (Lbs)'] = pd.to_numeric(df['peso_rm'], errors='coerce')
+    df['RM (Lbs)'] = pd.to_numeric(df['peso_rm'], errors='coerce').round().astype(int)
     df['Ejercicio'] = df['ejercicio'].astype(str)
 
     # Verificar si hay fechas no válidas
@@ -77,7 +79,7 @@ def m_visualiza_peso(usuario):
         st.write(df[df['fechahora'].isnull()])  # Mostrar registros con fechas no válidas para depuración
 
     # Ordenar datos por 'fechahora' de más reciente a más antiguo
-    df = df.sort_values(by='fechahora', ascending=False)
+    df = df.sort_values(by='fechahora', ascending=True)
 
     # Cambiar los títulos de las columnas
     df.rename(columns={
@@ -103,12 +105,18 @@ def m_visualiza_peso(usuario):
         st.warning(f"No hay datos disponibles para el ejercicio '{selected_exercise}'.")
         return
 
+    # Agregar una columna en filtered_data con el cálculo (RM (Lbs)-45)/2 y redondear
+    filtered_data['Lbs por lado'] = ((filtered_data['RM (Lbs)'] - 45) / 2).round().astype(int)
+
     # Limitar a los 50 registros más recientes
     filtered_data = filtered_data.head(50)
 
     # Seleccionar columnas y ajustar formato de la fecha
-    filtered_data = filtered_data[['Ejercicio', 'RM (Lbs)', 'RM (Kg)', 'Fecha']]
-    filtered_data['Fecha'] = filtered_data['Fecha'].dt.strftime('%Y-%m-%d %H:%M')
+    filtered_data = filtered_data[['Ejercicio', 'RM (Lbs)', 'RM (Kg)', 'Lbs por lado', 'Fecha']]
+    filtered_data['Fecha'] = filtered_data['Fecha'].dt.strftime('%d-%m-%Y %H:%M')
+
+    # Ordenar el dataframe por fecha para el gráfico
+    filtered_data = filtered_data.sort_values(by='Fecha', ascending=True)
 
     # Mostrar la tabla en Streamlit con el estilo ajustado
     st.write(get_table_style(), unsafe_allow_html=True)
@@ -116,6 +124,7 @@ def m_visualiza_peso(usuario):
 
     # Crear el gráfico de líneas 1
     fig = px.line(filtered_data, x='Fecha', y='RM (Lbs)', title=f'Peso registrado en el tiempo para {selected_exercise}')
+
     # Mostrar el gráfico
     st.plotly_chart(fig, use_container_width=True)
 
@@ -125,7 +134,6 @@ def m_visualiza_peso(usuario):
 
     # Mostrar el gráfico
     st.plotly_chart(fig, use_container_width=True)
-
 
 # Opción Porcentajes
 def m_porcentajes(usuario):
@@ -158,6 +166,12 @@ def m_porcentajes(usuario):
 
     # Obtener el mayor peso registrado para el ejercicio seleccionado
     max_weight = filtered_data['RM (Lbs)'].max()
+    fechahora = filtered_data.loc[filtered_data['RM (Lbs)'].idxmax(), 'Fecha']
+
+    # Convertir la fecha a solo el formato de fecha
+        # Convertir la fecha a solo el formato de fecha
+    fecha_obj = datetime.strptime(fechahora, '%Y-%m-%dT%H:%M:%S.%fZ').date()
+    fecha_str = fecha_obj.strftime('%d-%m-%Y')
 
     # Definir los porcentajes de 120% a 40% disminuyendo de 5% en 5%
     percentages = [f"{p}%" for p in range(120, 35, -5)]
@@ -182,6 +196,12 @@ def m_porcentajes(usuario):
 
     # Eliminar la primera columna de índice
     df_percentages.reset_index(drop=True, inplace=True)
+
+    # Crear el texto resaltado con valores dinámicos
+    highlighted_text = f'<p style="color:yellow; font-size:15px;">Cálculo en base a RM máximo registrado: {max_weight} lbs el {fecha_str}</p>'
+    
+    # Mostrar el texto en Streamlit
+    st.markdown(highlighted_text, unsafe_allow_html=True)
 
     st.write(get_table_style(), unsafe_allow_html=True)
     st.markdown(df_percentages.to_html(index=False, classes='dataframe'), unsafe_allow_html=True)
