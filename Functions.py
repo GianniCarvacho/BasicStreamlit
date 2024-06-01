@@ -263,21 +263,6 @@ def m_home_page(user):
     st.write(f"Hola, {user}. Esta es tu página de inicio. ¡Bienvenido!")
 
 
-# def update_profile(user):
-#     #  print(f"Perfil de {user} actualizado")  # Ejemplo de implementación de la función
-
-#         # Formulario de entrada de datos
-#     st.title("Formulario de Registro de Usuario")
-
-#     nombre = st.text_input("Nombre")
-#     edad = st.number_input("Edad", min_value=15, max_value=60)
-#     sexo = st.selectbox("Sexo", ["Hombre", "Mujer"])
-#     dias_entrenamiento = st.slider("Cuantos días entrenas a la Semana", 1, 7)
-
-#     if st.button("Guardar datos"):
-#         # Guardar datos en Airtable
-#         insert_user_profile(user, nombre, edad, sexo, dias_entrenamiento)
-#         st.success("Datos guardados exitosamente.")
 
 def update_profile(user):
     try: 
@@ -386,9 +371,13 @@ def m_visualiza_peso(usuario):
     
 
       # Imprimir líneas en blanco antes del markdown
-    # st.write('---')
+    
+    st.write("\n")
+    st.write('---')
 
-    st.markdown(f'Gráfico de RM para {selected_exercise}')
+    # highlighted_text = f'<p style="color:yellow; font-size:15px;">Cálculo en base a RM máximo registrado: {max_weight} lbs el {fecha_str}</p>'
+    highlighted_text = f'<p style="color:yellow; font-size:15px;">Evolución RM para {selected_exercise}</p>'
+    st.markdown(highlighted_text, unsafe_allow_html=True)
 
     # fig = px.line(df_graficos, x='Fecha', y="RM Libras")
     # st.plotly_chart(fig, theme="streamlit")
