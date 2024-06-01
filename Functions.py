@@ -403,11 +403,11 @@ def m_visualiza_peso(usuario):
     # df_sinfiltro['Fecha'] = pd.to_datetime(df_sinfiltro['Fecha'])  # Asegúrate de que las fechas estén en formato datetime
     df_sinfiltro['Fecha'] = pd.to_datetime(df_sinfiltro['Fecha'], format='%d-%m-%Y %H:%M', dayfirst=True)  # Asegúrate de que las fechas estén en formato datetime
     fig = px.line(df_sinfiltro, x='Fecha', y='RM Libras', color='Ejercicio', markers=True)
-    fig.update_layout(legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=-0.3,
-            xanchor="center",
-            x=0.5
-        ))
+    # fig.update_layout(legend=dict(
+    #         orientation="h",
+    #         # yanchor="bottom",
+    #         y=-0.3,
+    #         xanchor="center",
+    #         x=0.5
+    #     ))
     st.plotly_chart(fig, theme="streamlit")
