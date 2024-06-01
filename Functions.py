@@ -386,28 +386,16 @@ def m_visualiza_peso(usuario):
     
 
       # Imprimir líneas en blanco antes del markdown
-    st.write('---')
+    # st.write('---')
 
     st.markdown(f'Gráfico de RM para {selected_exercise}')
 
-    fig = px.line(df_graficos, x='Fecha', y="RM Libras")
-    st.plotly_chart(fig, theme="streamlit")
-
-
-
-    #Grafico todos los ejercicios.
-    # fig = px.line(df_sinfiltro, x='Fecha', y='RM Libras', color='Ejercicio', markers=True)
+    # fig = px.line(df_graficos, x='Fecha', y="RM Libras")
     # st.plotly_chart(fig, theme="streamlit")
 
 
-    # # df_sinfiltro['Fecha'] = pd.to_datetime(df_sinfiltro['Fecha'])  # Asegúrate de que las fechas estén en formato datetime
-    # df_sinfiltro['Fecha'] = pd.to_datetime(df_sinfiltro['Fecha'], format='%d-%m-%Y %H:%M', dayfirst=True)  # Asegúrate de que las fechas estén en formato datetime
-    # fig = px.line(df_sinfiltro, x='Fecha', y='RM Libras', color='Ejercicio', markers=True)
-    # # fig.update_layout(legend=dict(
-    # #         orientation="h",
-    # #         # yanchor="bottom",
-    # #         y=-0.3,
-    # #         xanchor="center",
-    # #         x=0.5
-    # #     ))
-    # st.plotly_chart(fig, theme="streamlit")
+
+    # #df_sinfiltro['Fecha'] = pd.to_datetime(df_sinfiltro['Fecha'])  # Asegúrate de que las fechas estén en formato datetime
+    df_sinfiltro['Fecha'] = pd.to_datetime(df_sinfiltro['Fecha'], format='%d-%m-%Y %H:%M', dayfirst=True)  # Asegúrate de que las fechas estén en formato datetime
+    st.line_chart(df_graficos, x='Fecha', y="RM Libras")
+
