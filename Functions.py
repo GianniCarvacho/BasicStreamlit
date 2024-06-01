@@ -36,8 +36,9 @@ def m_registro_rm(user):
             st.success(f'Registrado {rm} lbs para {exercise}')
 
 # Opción Visualizar Pesos
-def m_visualiza_peso(usuario):
-    st.title('Registro Histórico de RM')
+def m_visualiza_peso2(usuario):
+    # st.title('Registro Histórico de RM')
+    st.header('Registro Histórico de RM', divider='gray')
 
     # Cargar datos desde Airtable
     df = load_data_from_db(usuario)
@@ -111,29 +112,51 @@ def m_visualiza_peso(usuario):
     # Limitar a los 50 registros más recientes
     filtered_data = filtered_data.head(50)
 
-    # Seleccionar columnas y ajustar formato de la fecha
+    # Seleccionar columnas.
     filtered_data = filtered_data[['Ejercicio', 'RM (Lbs)', 'RM (Kg)', 'Lbs por lado', 'Fecha']]
-    filtered_data['Fecha'] = filtered_data['Fecha'].dt.strftime('%d-%m-%Y %H:%M')
 
-    # Ordenar el dataframe por fecha para el gráfico
-    filtered_data = filtered_data.sort_values(by='Fecha', ascending=True)
+    # Ordenar el dataframe por fecha para la tabla
+    filtered_data_table = filtered_data.sort_values(by='Fecha', ascending=False)
+    filtered_data_table['Fecha'] = filtered_data_table['Fecha'].dt.strftime('%d-%m-%Y %H:%M')
 
     # Mostrar la tabla en Streamlit con el estilo ajustado
     st.write(get_table_style(), unsafe_allow_html=True)
-    st.markdown(filtered_data.to_html(index=False, classes='dataframe'), unsafe_allow_html=True)
+    st.markdown(filtered_data_table.to_html(index=False, classes='dataframe'), unsafe_allow_html=True)
 
-    # Crear el gráfico de líneas 1
-    fig = px.line(filtered_data, x='Fecha', y='RM (Lbs)', title=f'Peso registrado en el tiempo para {selected_exercise}')
+    # Ordenar el dataframe por fecha para el gráfico
+    filtered_data_chart = filtered_data.sort_values(by='Fecha', ascending=True)
 
-    # Mostrar el gráfico
-    st.plotly_chart(fig, use_container_width=True)
-
-    # Crear el gráfico de líneas 2
-    fig = px.line(df, x='Fecha', y='RM (Lbs)', color='Ejercicio',
-                  title='Peso por Tipo de Ejercicio a lo Largo del Tiempo')
+    # Crear el gráfico de líneas
+    fig = px.line(filtered_data_chart, x='Fecha', y='RM (Lbs)', title=f'Peso registrado en el tiempo para {selected_exercise}')
 
     # Mostrar el gráfico
     st.plotly_chart(fig, use_container_width=True)
+
+    st.write('---')
+
+    Selected_ejercicio = st.multiselect(
+    'Selecciona Ejercicios para comparar en el gráfico',
+    JsonEjercicios, JsonEjercicios
+)
+
+    # Filtrar el dataframe por los ejercicios seleccionados
+    filtered_df = df[df['Ejercicio'].isin(Selected_ejercicio)]
+
+    # Ordenar el dataframe por fecha en formato datetime
+    filtered_df = filtered_df.sort_values(by='Fecha', ascending=True)
+
+    # Crear una nueva columna con la fecha en formato de cadena para la visualización
+    filtered_df['Fecha_str'] = filtered_df['Fecha'].dt.strftime('%d-%m-%Y')
+
+    # Agrupar por Fecha_str y Ejercicio, y tomar el valor máximo de RM (Lbs) para manejar duplicados
+    filtered_df_agg = filtered_df.groupby(['Fecha_str', 'Ejercicio'])['RM (Lbs)'].max().reset_index()
+
+    # Pivotar el DataFrame para que sea adecuado para st.line_chart
+    filtered_df_pivot = filtered_df_agg.pivot(index='Fecha_str', columns='Ejercicio', values='RM (Lbs)')
+
+    # Mostrar el gráfico
+    st.line_chart(filtered_df_pivot)
+
 
 # Opción Porcentajes
 def m_porcentajes(usuario):
@@ -205,8 +228,6 @@ def m_porcentajes(usuario):
 
     st.write(get_table_style(), unsafe_allow_html=True)
     st.markdown(df_percentages.to_html(index=False, classes='dataframe'), unsafe_allow_html=True)
-
-
 
 
 # Opción Tabla Conversiones
@@ -288,3 +309,105 @@ def update_profile(user):
         print(f"Error update_profile: {e}")
         st.error("Ocurrió un error al guardar los datos. Inténtalo de nuevo más tarde.")
 
+
+
+def formateo_pd(df):
+       # Convertir la columna de fechas a objetos datetime y ajustar la zona horaria
+        df['fechahora'] = pd.to_datetime(df['fechahora'])
+        df['fechahora'] = df['fechahora'].dt.tz_convert('America/Santiago') # Cambia esto a tu zona horaria deseada
+
+        # Ordenar la tabla de forma descendente por la columna fechahora
+        df = df.sort_values(by='fechahora', ascending=False)
+        df_graficos = df.sort_values(by='fechahora', ascending=True)
+        df_sinfiltro = df.sort_values(by='fechahora', ascending=True)
+
+        # Convertir la fecha al formato deseado
+        df['fechahora'] = df['fechahora'].dt.strftime('%d-%m-%Y %H:%M')
+        df_graficos['fechahora'] = df_graficos['fechahora'].dt.strftime('%d-%m-%Y %H:%M')
+        df_sinfiltro['fechahora'] = df_sinfiltro['fechahora'].dt.strftime('%d-%m-%Y %H:%M')
+
+        # Agregar nueva columna "peso en kilos"
+        df['peso en kilos'] = (df['peso_rm'] / 2.205).round().astype(int)  # Ejemplo de conversión, ajustar según sea necesario
+        
+        # Reordenar las columnas y eliminar la columna 'id'
+        df = df[['ejercicio', 'peso_rm', 'peso en kilos', 'fechahora']]
+
+            # Renombrar las columnas
+        df = df.rename(columns={
+            'ejercicio': 'Ejercicio',
+            'peso_rm': 'RM Libras',
+            'peso en kilos': 'RM Kilos',
+            'fechahora': 'Fecha'
+        })
+
+        df_graficos = df_graficos.rename(columns={
+            'ejercicio': 'Ejercicio',
+            'peso_rm': 'RM Libras',
+            'fechahora': 'Fecha'
+        })
+
+        df_sinfiltro = df_sinfiltro.rename(columns={
+            'ejercicio': 'Ejercicio',
+            'peso_rm': 'RM Libras',
+            'fechahora': 'Fecha'
+        })
+
+
+        # df = df.head(50)  # Limitar a los 50 registros más recientes
+        return df,df_graficos,df_sinfiltro
+
+
+
+def m_visualiza_peso(usuario):
+   
+    st.header('Registro Histórico de RM', divider='gray')
+
+    # Cargar datos desde Airtable
+    df = load_data_from_db(usuario)
+
+    # Verificar si el dataframe está vacío
+    if df.empty:
+        st.warning("No hay datos disponibles para mostrar.")
+        return
+
+    df_formateado,df_graficos,df_sinfiltro = formateo_pd(df)
+   
+
+    JsonEjercicios = load_exercises_Json()
+    selected_exercise = st.selectbox('Selecciona Ejercicio', JsonEjercicios)
+
+    df_ejercicio = df_formateado[df_formateado['Ejercicio'] == selected_exercise]
+    df_ejercicio.head(30)
+    df_graficos = df_graficos[df_graficos['Ejercicio'] == selected_exercise]
+    # st.write(df_ejercicio)
+
+    st.write(get_table_style(), unsafe_allow_html=True)
+    st.markdown(df_ejercicio.to_html(index=False, classes='dataframe'), unsafe_allow_html=True)
+    
+
+      # Imprimir líneas en blanco antes del markdown
+    st.write('---')
+
+    st.markdown(f'Gráfico de RM para {selected_exercise}')
+
+    fig = px.line(df_graficos, x='Fecha', y="RM Libras")
+    st.plotly_chart(fig, theme="streamlit")
+
+
+
+    #Grafico todos los ejercicios.
+    # fig = px.line(df_sinfiltro, x='Fecha', y='RM Libras', color='Ejercicio', markers=True)
+    # st.plotly_chart(fig, theme="streamlit")
+
+
+    # df_sinfiltro['Fecha'] = pd.to_datetime(df_sinfiltro['Fecha'])  # Asegúrate de que las fechas estén en formato datetime
+    df_sinfiltro['Fecha'] = pd.to_datetime(df_sinfiltro['Fecha'], format='%d-%m-%Y %H:%M', dayfirst=True)  # Asegúrate de que las fechas estén en formato datetime
+    fig = px.line(df_sinfiltro, x='Fecha', y='RM Libras', color='Ejercicio', markers=True)
+    fig.update_layout(legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=-0.3,
+            xanchor="center",
+            x=0.5
+        ))
+    st.plotly_chart(fig, theme="streamlit")
