@@ -401,8 +401,8 @@ def m_visualiza_peso(usuario):
 
 
     # Grafico todos los ejercicios con una línea de tiempo común
-    df_sinfiltro['Fecha'] = pd.to_datetime(df_sinfiltro['Fecha'], format='%d-%m-%Y %H:%M', dayfirst=True)  # Asegúrate de que las fechas estén en formato datetime
-    fig = px.line(df_sinfiltro, x='Fecha', y='RM Libras', color='Ejercicio', markers=True)
+    df_graficos['Fecha'] = pd.to_datetime(df_graficos['Fecha'], format='%d-%m-%Y %H:%M', dayfirst=True)  # Asegúrate de que las fechas estén en formato datetime
+    fig = px.line(df_graficos, x='Fecha', y='RM Libras', markers=True)
     fig.update_layout(
         legend=dict(
             orientation="h",
