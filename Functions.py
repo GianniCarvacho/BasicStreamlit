@@ -395,7 +395,26 @@ def m_visualiza_peso(usuario):
 
 
 
-    # #df_sinfiltro['Fecha'] = pd.to_datetime(df_sinfiltro['Fecha'])  # Asegúrate de que las fechas estén en formato datetime
-    df_sinfiltro['Fecha'] = pd.to_datetime(df_sinfiltro['Fecha'], format='%d-%m-%Y %H:%M', dayfirst=True)  # Asegúrate de que las fechas estén en formato datetime
-    st.line_chart(df_graficos, x='Fecha', y="RM Libras")
+    # # #df_sinfiltro['Fecha'] = pd.to_datetime(df_sinfiltro['Fecha'])  # Asegúrate de que las fechas estén en formato datetime
+    # df_sinfiltro['Fecha'] = pd.to_datetime(df_sinfiltro['Fecha'], format='%d-%m-%Y %H:%M', dayfirst=True)  # Asegúrate de que las fechas estén en formato datetime
+    # st.line_chart(df_graficos, x='Fecha', y="RM Libras")
 
+
+    # Grafico todos los ejercicios con una línea de tiempo común
+    df_sinfiltro['Fecha'] = pd.to_datetime(df_sinfiltro['Fecha'], format='%d-%m-%Y %H:%M', dayfirst=True)  # Asegúrate de que las fechas estén en formato datetime
+    fig = px.line(df_sinfiltro, x='Fecha', y='RM Libras', color='Ejercicio', markers=True)
+    fig.update_layout(
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=-0.3,
+            xanchor="center",
+            x=0.5
+        ),
+        autosize=True,
+        width=800,  # Ajusta el ancho según sea necesario
+        height=500,  # Ajusta la altura según sea necesario
+        margin=dict(l=0, r=0, t=0, b=0),  # Ajusta los márgenes según sea necesario
+        xaxis=dict(tickangle=-45)  # Rotar etiquetas del eje X
+    )
+    st.plotly_chart(fig, use_container_width=True, theme="streamlit")
