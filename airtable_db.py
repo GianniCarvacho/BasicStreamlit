@@ -92,19 +92,24 @@ def get_user_profile(user):
 
     return None  # Devuelve None si no se encontraron coincidencias
 
-def insert_or_update_user_profile(user, nombre, edad, sexo, dias_entrenamiento, accion):
-    try:    
+def insert_or_update_user_profile(user, nombre, edad, sexo, dias_entrenamiento):
+    try:
         profile = get_user_profile(user)
-        if accion == 'insert':
+        fields = {
+            'usuario': user,
+            'nombre': nombre,
+            'edad': edad,
+            'sexo': sexo,
+            'total_entren': dias_entrenamiento,
+        }
+
+        if profile:
+            profile_table.update(profile['id'], fields)
+        else:
             insert_user_profile(user, nombre, edad, sexo, dias_entrenamiento)
-        elif accion == 'update':
-            fields = {
-                    'usuario': user,
-                    'nombre': nombre,
-                    'edad': edad,
-                    'sexo': sexo,
-                    'total_entren': dias_entrenamiento,
-                }
-        profile_table.update(profile['id'], fields)
     except Exception as e:
         print(f"Error insert_or_update_user_profile: {e}")
+
+
+
+

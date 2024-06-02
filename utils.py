@@ -2,6 +2,7 @@ import json
 import streamlit as st
 import hmac
 from pathlib import Path
+import pandas as pd
 
 # Función para cargar ejercicios desde un archivo JSON
 def load_exercises_Json():
@@ -63,3 +64,47 @@ def get_table_style():
     }
     </style>
     """
+def formateo_pd_visualizaPeso(df):
+       # Convertir la columna de fechas a objetos datetime y ajustar la zona horaria
+        df['fechahora'] = pd.to_datetime(df['fechahora'])
+        df['fechahora'] = df['fechahora'].dt.tz_convert('America/Santiago') # Cambia esto a tu zona horaria deseada
+
+        # Ordenar la tabla de forma descendente por la columna fechahora
+        df = df.sort_values(by='fechahora', ascending=False)
+        df_graficos = df.sort_values(by='fechahora', ascending=True)
+        df_sinfiltro = df.sort_values(by='fechahora', ascending=True)
+
+        # Convertir la fecha al formato deseado
+        df['fechahora'] = df['fechahora'].dt.strftime('%d-%m-%Y %H:%M')
+        df_graficos['fechahora'] = df_graficos['fechahora'].dt.strftime('%d-%m-%Y %H:%M')
+        df_sinfiltro['fechahora'] = df_sinfiltro['fechahora'].dt.strftime('%d-%m-%Y %H:%M')
+
+        # Agregar nueva columna "peso en kilos"
+        df['peso en kilos'] = (df['peso_rm'] / 2.205).round().astype(int)  # Ejemplo de conversión, ajustar según sea necesario
+        
+        # Reordenar las columnas y eliminar la columna 'id'
+        df = df[['ejercicio', 'peso_rm', 'peso en kilos', 'fechahora']]
+
+            # Renombrar las columnas
+        df = df.rename(columns={
+            'ejercicio': 'Ejercicio',
+            'peso_rm': 'RM Libras',
+            'peso en kilos': 'RM Kilos',
+            'fechahora': 'Fecha'
+        })
+
+        df_graficos = df_graficos.rename(columns={
+            'ejercicio': 'Ejercicio',
+            'peso_rm': 'RM Libras',
+            'fechahora': 'Fecha'
+        })
+
+        df_sinfiltro = df_sinfiltro.rename(columns={
+            'ejercicio': 'Ejercicio',
+            'peso_rm': 'RM Libras',
+            'fechahora': 'Fecha'
+        })
+
+
+        # df = df.head(50)  # Limitar a los 50 registros más recientes
+        return df,df_graficos,df_sinfiltro
