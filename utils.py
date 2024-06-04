@@ -65,6 +65,8 @@ def get_table_style():
     </style>
     """
 def formateo_pd_visualizaPeso(df):
+        
+        
        # Convertir la columna de fechas a objetos datetime y ajustar la zona horaria
         df['fechahora'] = pd.to_datetime(df['fechahora'])
         df['fechahora'] = df['fechahora'].dt.tz_convert('America/Santiago') # Cambia esto a tu zona horaria deseada
@@ -108,3 +110,34 @@ def formateo_pd_visualizaPeso(df):
 
         # df = df.head(50)  # Limitar a los 50 registros más recientes
         return df,df_graficos,df_sinfiltro
+
+
+
+
+def check_password():
+    if st.session_state.get("password_correct", False):
+        return True
+    
+    login_form()
+    
+    if "password_correct" in st.session_state and not st.session_state["password_correct"]:
+        st.error("User not known or password incorrect")
+    return False
+
+
+def login_form():
+    with st.form("Credentials"):
+        st.text_input("Username", key="username")
+        st.text_input("Password", type="password", key="password")
+        st.form_submit_button("Log in", on_click=password_entered)
+
+
+def password_entered():
+    if st.session_state["username"] in st.secrets["passwords"] and \
+       hmac.compare_digest(st.session_state["password"], st.secrets.passwords[st.session_state["username"]]):
+        st.session_state["password_correct"] = True
+        st.session_state["current_user"] = st.session_state["username"]
+        del st.session_state["password"]
+        del st.session_state["username"]
+    else:
+        st.session_state["password_correct"] = False
