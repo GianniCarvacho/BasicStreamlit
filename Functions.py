@@ -9,17 +9,51 @@ from datetime import datetime
 # from utils_openai import obtener_mensaje_motivacional
 
 
+
+def get_table_style():
+    return """
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #333;
+            text-align: left;
+        }
+    </style>
+    """
+
+
 # Opción Registro de RM
 def m_registro_rm(user):
     st.title('Registro de RM')
     EjerciciosJson = load_exercises_Json()
 
     exercise = st.selectbox('Elegir ejercicio', (EjerciciosJson))
-    st.radio('Barra', ['45 Lbs.'])
-    valorBarra = int(45)
+    
+    SelectBarra = st.radio('Agregar Barra', ['Sin Barra','35 Lbs.','45 Lbs.'])
+  
 
-    discos = st.number_input('Suma Total Libras', min_value=0)
-    weight = discos + valorBarra
+    if SelectBarra == 'Sin Barra':
+        valorBarra = int(0)
+    elif SelectBarra == '35 Lbs.': 
+        valorBarra = int(35)    
+    elif SelectBarra == '45 Lbs.':
+        valorBarra = int(45)
+
+
+    discos = st.number_input('Suma Total Libras', value=0, placeholder='Ingresa Total Libras')
+    
+    if discos is not None:
+        weight = discos + valorBarra
+    elif discos is None: 
+         weight =0
+
     repes = st.number_input('Número de Repeticiones', min_value=1, max_value=10)
 
     # Calcular el RM en tiempo real
@@ -37,7 +71,6 @@ def m_registro_rm(user):
 
 # Opción Visualizar Pesos
 def m_visualiza_peso(usuario):
-   
     st.header('Registro Histórico de RM', divider='gray')
 
     # Cargar datos desde Airtable
@@ -48,42 +81,63 @@ def m_visualiza_peso(usuario):
         st.warning("No hay datos disponibles para mostrar.")
         return
 
-    df_formateado,df_graficos,df_sinfiltro = formateo_pd_visualizaPeso(df)
-   
+    df_formateado, df_graficos, df_sinfiltro = formateo_pd_visualizaPeso(df)
 
     JsonEjercicios = load_exercises_Json()
     selected_exercise = st.selectbox('Selecciona Ejercicio', JsonEjercicios)
 
     df_ejercicio = df_formateado[df_formateado['Ejercicio'] == selected_exercise]
-    df_ejercicio.head(30)
     df_graficos = df_graficos[df_graficos['Ejercicio'] == selected_exercise]
-    # st.write(df_ejercicio)
 
-    st.write(get_table_style(), unsafe_allow_html=True)
-    st.markdown(df_ejercicio.to_html(index=False, classes='dataframe'), unsafe_allow_html=True)
-    
+    # Aplicar estilos CSS personalizados
+    st.markdown("""
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #333;
+            color: white;
+            text-align: center;
+        }
+        td {
+            text-align: center;
+        }
+        td:first-child {
+            text-align: left;
+        }
+        @media only screen and (max-width: 600px) {
+            .dataframe th, .dataframe td {
+                padding: 8px 6px;
+                font-size: 14px;
+            }
+            .dataframe {
+                width: 100%;
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
-      # Imprimir líneas en blanco antes del markdown
-    
+    # Generar la tabla HTML del DataFrame
+    df_ejercicio_html = df_ejercicio.to_html(index=False, classes='dataframe')
+    st.markdown(df_ejercicio_html, unsafe_allow_html=True)
+
     st.write("\n")
     st.write('---')
 
-    # highlighted_text = f'<p style="color:yellow; font-size:15px;">Cálculo en base a RM máximo registrado: {max_weight} lbs el {fecha_str}</p>'
     highlighted_text = f'<p style="color:yellow; font-size:15px;">Evolución RM para {selected_exercise}</p>'
     st.markdown(highlighted_text, unsafe_allow_html=True)
 
-    # fig = px.line(df_graficos, x='Fecha', y="RM Libras")
-    # st.plotly_chart(fig, theme="streamlit")
-
-
-
-    # # #df_sinfiltro['Fecha'] = pd.to_datetime(df_sinfiltro['Fecha'])  # Asegúrate de que las fechas estén en formato datetime
-    # df_sinfiltro['Fecha'] = pd.to_datetime(df_sinfiltro['Fecha'], format='%d-%m-%Y %H:%M', dayfirst=True)  # Asegúrate de que las fechas estén en formato datetime
-    # st.line_chart(df_graficos, x='Fecha', y="RM Libras")
-
-
-    # Grafico todos los ejercicios con una línea de tiempo común
-    df_graficos['Fecha'] = pd.to_datetime(df_graficos['Fecha'], format='%d-%m-%Y %H:%M', dayfirst=True)  # Asegúrate de que las fechas estén en formato datetime
+    # Graficar todos los ejercicios con una línea de tiempo común
+    df_graficos['Fecha'] = pd.to_datetime(df_graficos['Fecha'], format='%d-%m-%Y %H:%M', dayfirst=True)
     fig = px.line(df_graficos, x='Fecha', y='RM Libras', markers=True)
     fig.update_layout(
         legend=dict(
@@ -94,12 +148,15 @@ def m_visualiza_peso(usuario):
             x=0.5
         ),
         autosize=True,
-        width=800,  # Ajusta el ancho según sea necesario
-        height=500,  # Ajusta la altura según sea necesario
-        margin=dict(l=0, r=0, t=0, b=0),  # Ajusta los márgenes según sea necesario
-        xaxis=dict(tickangle=-45)  # Rotar etiquetas del eje X
+        width=800,
+        height=500,
+        margin=dict(l=0, r=0, t=0, b=0),
+        xaxis=dict(tickangle=-45)
     )
     st.plotly_chart(fig, use_container_width=True, theme="streamlit")
+
+
+
 
 # Opción Porcentajes
 def m_porcentajes(usuario):
@@ -153,8 +210,8 @@ def m_porcentajes(usuario):
     # Crear un DataFrame con los porcentajes y pesos
     data = {
         'Porcentaje (%)': percentages,
+        'Peso (Kg)': weights_kg,        
         'Peso (Lbs)': weights_lbs,
-        'Peso Kg': weights_kg,
         'Discos Total (lbs)': discs_total_lbs,
         'Discos por lado (Lbs)': discs_per_side_lbs
     }
@@ -165,8 +222,6 @@ def m_porcentajes(usuario):
 
     # Crear el texto resaltado con valores dinámicos
     highlighted_text = f'<p style="color:yellow; font-size:15px;">Cálculo en base a RM máximo registrado: {max_weight} lbs el {fecha_str}</p>'
-    
-    # Mostrar el texto en Streamlit
     st.markdown(highlighted_text, unsafe_allow_html=True)
 
     st.write(get_table_style(), unsafe_allow_html=True)

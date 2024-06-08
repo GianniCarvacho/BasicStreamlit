@@ -3,6 +3,7 @@ import streamlit as st
 import hmac
 from pathlib import Path
 import pandas as pd
+from datetime import datetime, timedelta
 
 # Función para cargar ejercicios desde un archivo JSON
 def load_exercises_Json():
@@ -113,11 +114,16 @@ def formateo_pd_visualizaPeso(df):
 
 
 
-
 def check_password():
+    session_timeout = timedelta(minutes=90)  # Ajusta el tiempo de sesión según tus necesidades
+    if "login_time" in st.session_state:
+        if datetime.now() - st.session_state["login_time"] > session_timeout:
+            st.session_state["password_correct"] = False
+
     if st.session_state.get("password_correct", False):
+        st.session_state["login_time"] = datetime.now()
         return True
-    
+
     login_form()
     
     if "password_correct" in st.session_state and not st.session_state["password_correct"]:
@@ -137,6 +143,7 @@ def password_entered():
        hmac.compare_digest(st.session_state["password"], st.secrets.passwords[st.session_state["username"]]):
         st.session_state["password_correct"] = True
         st.session_state["current_user"] = st.session_state["username"]
+        st.session_state["login_time"] = datetime.now()
         del st.session_state["password"]
         del st.session_state["username"]
     else:
